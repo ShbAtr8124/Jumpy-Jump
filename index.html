@@ -3,51 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jumpy Jump</title>
+    <title>Jumpy Jump - UI Fixed</title>
     <style>
         body { background-color: black; margin: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; touch-action: manipulation; }
-        .game-bar { display: flex; justify-content: space-between; align-items: center; background-color: black; padding: 10px 20px; border-bottom: 3px solid blue; position: fixed; top: 0; width: 100%; box-sizing: border-box; z-index: 1000; }
-        .stats { color: white; display: flex; gap: 15px; font-size: 13px; }
-        .stat-item { display: flex; flex-direction: column; align-items: center; }
-        .label { font-size: 10px; color: #aaa; text-transform: uppercase; }
+        
+        /* Optimierte Game-Bar */
+        .game-bar { display: flex; justify-content: space-between; align-items: center; background-color: black; padding: 5px 15px; border-bottom: 3px solid blue; position: fixed; top: 0; width: 100%; box-sizing: border-box; z-index: 3000; height: 75px; gap: 10px; }
+        
+        .game-title { color: blue; font-weight: bold; font-size: 14px; min-width: 60px; white-space: nowrap; }
+        
+        .stats { color: white; display: flex; gap: 12px; font-size: 12px; flex-grow: 1; justify-content: center; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; min-width: 55px; }
+        .stat-item span.ar-text { font-size: 1.4em; font-weight: bold; line-height: 1; }
+        .label { font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px; }
+        
+        .btn-group { display: flex; gap: 5px; }
+        .mini-btn { padding: 8px 12px; font-size: 10px; color: white; border: 1px solid white; border-radius: 6px; cursor: pointer; font-weight: bold; background: blue; min-width: 55px; }
+        
         .floor { position: absolute; bottom: 150px; width: 100%; height: 5px; background-color: white; z-index: 5; }
-        #character { width: 60px; height: 60px; background-color: red; position: absolute; bottom: 150px; left: 50px; z-index: 100; }
-        #enemy { width: 60px; height: 60px; background-color: blue; position: absolute; bottom: 150px; left: 3000px; z-index: 90; }
-        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); z-index: 2000; text-align: center; }
-        .big-blue-title { color: blue; font-size: 50px; margin-bottom: 20px; }
-        .main-btn { padding: 20px 40px; font-size: 22px; background: blue; color: white; border: 2px solid white; border-radius: 15px; cursor: pointer; font-weight: bold; }
-        .mini-btn { padding: 8px 12px; font-size: 11px; color: white; border: 1px solid white; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .instruction { color: white; margin-top: 20px; font-size: 16px; opacity: 0.8; font-family: Arial, sans-serif; }
+        #character { width: 60px; height: 60px; background-color: red; position: absolute; bottom: 150px; left: 50px; z-index: 100; border-radius: 0; }
+        #enemy { width: 60px; height: 60px; background-color: blue; position: absolute; bottom: 150px; left: 3000px; z-index: 90; border-radius: 0; }
+        
+        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); z-index: 2000; text-align: center; color: white; }
+        .big-blue-title { color: blue; font-size: 50px; margin-bottom: 10px; }
+        .main-btn { padding: 15px 40px; font-size: 22px; background: blue; color: white; border: 2px solid white; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+        .main-btn.ar-text { font-size: 30px; }
+        
+        .date-time { color: #00f; font-size: 14px; margin-bottom: 20px; font-family: monospace; }
+        .lang-switcher { display: flex; gap: 10px; margin-bottom: 25px; }
+        .lang-btn { background: #333; color: white; border: 1px solid white; padding: 8px 14px; cursor: pointer; font-size: 14px; border-radius: 6px; }
     </style>
 </head>
 <body>
 
     <div class="game-bar">
-        <div style="color: blue; font-weight: bold;">JUMPY JUMP</div>
+        <div class="game-title">JUMPY JUMP</div>
         <div class="stats">
-            <div class="stat-item"><span class="label">Punkte</span><span id="score-display">0</span></div>
-            <div class="stat-item"><span class="label">Rekord</span><span id="highscore-display">🏆0</span></div>
-            <div class="stat-item"><span class="label">Level</span><span id="lvl-display">1</span></div>
+            <div class="stat-item"><span class="label" id="lbl-score">PUNKTE</span><span id="score-display">0</span></div>
+            <div class="stat-item"><span class="label" id="lbl-lvl">LEVEL</span><span id="lvl-display">1</span></div>
+            <div class="stat-item"><span class="label" id="lbl-high">REKORD</span><span id="highscore-display">🏆0</span></div>
         </div>
-        <div style="display: flex; gap: 5px;">
-            <button class="mini-btn" style="background: blue;" onclick="event.stopPropagation(); startGame()">START</button>
-            <button class="mini-btn" style="background: blue;" onclick="event.stopPropagation(); stopGame()">STOP</button>
-            <button class="mini-btn" style="background: blue;" onclick="event.stopPropagation(); resetEnemyOnly()">RESET</button>
+        <div class="btn-group">
+            <button class="mini-btn" id="btn-start-top" onmousedown="event.stopPropagation(); startGame()" ontouchstart="event.stopPropagation(); startGame()">START</button>
+            <button class="mini-btn" id="btn-stop-top" onmousedown="event.stopPropagation(); stopGame()" ontouchstart="event.stopPropagation(); stopGame()">STOP</button>
+            <button class="mini-btn" id="btn-reset-top" onmousedown="event.stopPropagation(); resetGame()" ontouchstart="event.stopPropagation(); resetGame()">RESET</button>
         </div>
     </div>
 
     <div id="start-screen" class="screen">
-        <div class="big-blue-title">JUMPY JUMP</div>
-        <button class="main-btn" onclick="event.stopPropagation(); startGame()">START</button>
-        <div class="instruction">
-            Drücke die <b>Leertaste</b> oder <b>tippe das Display</b> zum Springen!
+        <div id="live-clock" class="date-time">18.02.2026 | 11:38</div>
+        <div class="lang-switcher">
+            <button class="lang-btn" onclick="setLang('de')">DE</button>
+            <button class="lang-btn" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" onclick="setLang('tr')">TR</button>
+            <button class="lang-btn" onclick="setLang('ar')">AR</button>
         </div>
+        <div class="big-blue-title">JUMPY JUMP</div>
+        <button class="main-btn" id="btn-main-start" onmousedown="event.stopPropagation(); startGame()" ontouchstart="event.stopPropagation(); startGame()">START</button>
     </div>
 
     <div id="game-over-screen" class="screen" style="display: none;">
-        <div style="color: white; font-size: 60px; font-weight: bold; margin-bottom: 20px;">GAME OVER!</div>
-        <div id="final-score" style="color: white; font-size: 24px; margin-bottom: 30px;">0</div>
-        <button class="main-btn" onclick="event.stopPropagation(); restartQuick()">NOCHMAL</button>
+        <h1 id="txt-gameover" style="font-size: 50px;">GAME OVER!</h1>
+        <div id="final-score" style="font-size: 30px; margin-bottom: 25px;">0</div>
+        <button class="main-btn" id="btn-restart" onmousedown="event.stopPropagation(); restartQuick()" ontouchstart="event.stopPropagation(); restartQuick()">RESTART</button>
     </div>
 
     <div class="floor"></div>
@@ -55,111 +73,105 @@
     <div id="enemy"></div>
 
     <script>
-        const char = document.getElementById('character'), ene = document.getElementById('enemy');
-        const scoreDisp = document.getElementById('score-display'), highDisp = document.getElementById('highscore-display');
-        const lvlDisp = document.getElementById('lvl-display'), startScr = document.getElementById('start-screen'), goScr = document.getElementById('game-over-screen');
-        const finalScoreDisp = document.getElementById('final-score');
+        const translations = {
+            de: { score: "PUNKTE", lvl: "LEVEL", high: "REKORD", stop: "STOP", reset: "RESET", start: "START", go: "GAME OVER", restart: "NOCHMAL" },
+            en: { score: "SCORE", lvl: "LEVEL", high: "BEST", stop: "STOP", reset: "RESET", start: "START", go: "GAME OVER", restart: "RESTART" },
+            tr: { score: "PUAN", lvl: "SEVİYE", high: "REKOR", stop: "DUR", reset: "SIFIRLA", start: "BAŞLA", go: "OYUN BİTTİ", restart: "TEKRAR" },
+            ar: { score: "النقاط", lvl: "مستوى", high: "الرقم القياسي", stop: "قف", reset: "إعادة", start: "ابدأ", go: "انتهت اللعبة", restart: "إعادة" }
+        };
 
-        let score = 0, level = 1, speed = 8, running = false, enemyPos = 3000;
-        let charY = 150, jumpVel = 0, grav = 0.8, jumping = false, animId;
-        
+        function setLang(lang) {
+            const t = translations[lang];
+            const scoreLbl = document.getElementById('lbl-score'), highLbl = document.getElementById('lbl-high'), 
+                  lvlLbl = document.getElementById('lbl-lvl'), mainBtn = document.getElementById('btn-main-start'),
+                  goTxt = document.getElementById('txt-gameover'), restartBtn = document.getElementById('btn-restart');
+
+            scoreLbl.innerText = t.score; highLbl.innerText = t.high; lvlLbl.innerText = t.lvl;
+            document.getElementById('btn-start-top').innerText = t.start;
+            document.getElementById('btn-stop-top').innerText = t.stop;
+            document.getElementById('btn-reset-top').innerText = t.reset;
+            mainBtn.innerText = t.start; goTxt.innerText = t.go; restartBtn.innerText = t.restart;
+
+            const targets = [scoreLbl, highLbl, lvlLbl, mainBtn, goTxt, restartBtn];
+            targets.forEach(el => lang === 'ar' ? el.classList.add('ar-text') : el.classList.remove('ar-text'));
+            
+            // Layout-Fix: Bei Arabisch schalten wir RTL nur für Text ein, behalten aber die Button-Leiste oben links->rechts
+            document.body.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
+            document.querySelector('.game-bar').style.direction = 'ltr'; // Buttons oben bleiben sortiert
+            document.querySelector('.stats').style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
+        }
+
+        const char = document.getElementById('character'), ene = document.getElementById('enemy'),
+              scoreDisp = document.getElementById('score-display'), lvlDisp = document.getElementById('lvl-display'),
+              highDisp = document.getElementById('highscore-display'), clockDisp = document.getElementById('live-clock'),
+              startScr = document.getElementById('start-screen'), goScr = document.getElementById('game-over-screen');
+
+        let score = 0, level = 1, speed = 8, running = false, enemyPos = 3000, charY = 150, jumpVel = 0, grav = 0.8, jumping = false, animId;
         let highscore = localStorage.getItem('jumpyHighscore') || 0;
         highDisp.innerText = "🏆" + highscore;
 
+        function updateClock() {
+            const n = new Date();
+            clockDisp.innerText = n.toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}).toUpperCase();
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        window.addEventListener('mousedown', (e) => { if(e.target.tagName !== 'BUTTON') jump(); });
+        window.addEventListener('touchstart', (e) => { if(e.target.tagName !== 'BUTTON') { e.preventDefault(); jump(); } }, {passive: false});
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); jump(); } });
+
         function startGame() {
             if (running) return;
-            startScr.style.display = 'none';
-            goScr.style.display = 'none';
-            enemyPos = window.innerWidth;
-            running = true;
-            gameLoop();
+            startScr.style.display = 'none'; goScr.style.display = 'none';
+            if (enemyPos > window.innerWidth) enemyPos = window.innerWidth;
+            running = true; gameLoop();
         }
 
-        function stopGame() {
-            running = false;
-            cancelAnimationFrame(animId);
-        }
+        function stopGame() { running = false; cancelAnimationFrame(animId); startScr.style.display = 'flex'; }
 
-        function resetEnemyOnly() {
-            stopGame();
-            goScr.style.display = 'none';
-            startScr.style.display = 'flex';
-            score = 0; level = 1; speed = 8;
-            enemyPos = 3000; 
-            ene.style.left = enemyPos + "px";
-            scoreDisp.innerText = "0";
-            lvlDisp.innerText = "1";
+        function resetGame() {
+            running = false; cancelAnimationFrame(animId);
+            score = 0; level = 1; speed = 8; enemyPos = 3000;
+            scoreDisp.innerText = "0"; lvlDisp.innerText = "1";
+            ene.style.left = "3000px";
+            goScr.style.display = 'none'; startScr.style.display = 'flex';
         }
 
         function restartQuick() {
-            resetEnemyOnly();
-            startScr.style.display = 'none';
+            running = false; cancelAnimationFrame(animId);
+            score = 0; level = 1; speed = 8; enemyPos = window.innerWidth;
+            scoreDisp.innerText = "0"; lvlDisp.innerText = "1"; goScr.style.display = 'none';
             startGame();
         }
 
-        function jump() {
-            if (!running || jumping) return;
-            jumping = true;
-            jumpVel = 18; 
-        }
-
-        // Steuerung für PC & Mobile kombiniert
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') jump(); });
-        
-        // Touchstart für Handys (schneller als mousedown)
-        document.body.addEventListener('touchstart', (e) => { 
-            if (e.target.tagName !== 'BUTTON') {
-                e.preventDefault(); // Verhindert Zoom/Scroll beim Spielen
-                jump(); 
-            }
-        }, {passive: false});
-
-        // Mouse für PC-Klicks
-        document.body.addEventListener('mousedown', (e) => { 
-            if (e.target.tagName !== 'BUTTON') jump(); 
-        });
+        function jump() { if (running && !jumping) { jumping = true; jumpVel = 18; } }
 
         function gameLoop() {
             if (!running) return;
-
             if (jumping) {
-                charY += jumpVel;
-                jumpVel -= grav;
-                if (charY <= 150) { charY = 150; jumping = false; jumpVel = 0; }
+                charY += jumpVel; jumpVel -= grav;
+                if (charY <= 150) { charY = 150; jumping = false; }
             }
             char.style.bottom = charY + "px";
-
             enemyPos -= speed;
             if (enemyPos < -100) {
-                enemyPos = window.innerWidth;
-                score++;
-                if (score % 5 === 0) { level++; speed += 1.5; }
+                enemyPos = window.innerWidth; score++;
+                if (score % 5 === 0) { level++; speed += 1.2; lvlDisp.innerText = level; }
                 scoreDisp.innerText = score;
-                lvlDisp.innerText = level;
             }
             ene.style.left = enemyPos + "px";
-
-            let c = char.getBoundingClientRect();
-            let e = ene.getBoundingClientRect();
-            
-            if (enemyPos < 500 && c.right - 25 > e.left + 25 && c.left + 25 < e.right - 25 && charY < 205) {
-                gameOver();
-            } else {
-                animId = requestAnimationFrame(gameLoop);
-            }
+            let c = char.getBoundingClientRect(), e = ene.getBoundingClientRect();
+            if (c.right > e.left + 8 && c.left < e.right - 8 && c.bottom > e.top + 8) gameOver();
+            else animId = requestAnimationFrame(gameLoop);
         }
 
         function gameOver() {
-            running = false;
-            cancelAnimationFrame(animId);
-            finalScoreDisp.innerText = "Punkte: " + score;
-            if (score > highscore) {
-                highscore = score;
-                localStorage.setItem('jumpyHighscore', highscore);
-                highDisp.innerText = "🏆" + highscore;
-            }
+            running = false; cancelAnimationFrame(animId);
+            document.getElementById('final-score').innerText = score;
+            if (score > highscore) { highscore = score; localStorage.setItem('jumpyHighscore', highscore); highDisp.innerText = "🏆" + highscore; }
             goScr.style.display = 'flex';
         }
+        setLang('de');
     </script>
 </body>
 </html>
