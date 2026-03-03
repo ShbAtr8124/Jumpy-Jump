@@ -1,173 +1,90 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jumpy Jump</title>
     <style>
-        body { background-color: black; margin: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; touch-action: manipulation; }
-        
-        .game-bar { display: flex; justify-content: space-between; align-items: center; background-color: black; padding: 5px 15px; border-bottom: 3px solid blue; position: fixed; top: 0; width: 100%; box-sizing: border-box; z-index: 3000; height: 75px; gap: 10px; }
-        .game-title { color: blue; font-weight: bold; font-size: 14px; min-width: 60px; white-space: nowrap; }
-        
-        .stats { color: white; display: flex; gap: 12px; font-size: 12px; flex-grow: 1; justify-content: center; }
-        .stat-item { display: flex; flex-direction: column; align-items: center; min-width: 55px; }
-        .label { font-size: 8px; color: #aaa; text-transform: uppercase; margin-bottom: 2px; }
-        
-        .btn-group { display: flex; gap: 5px; }
-        .mini-btn { padding: 8px 12px; font-size: 10px; color: white; border: 1px solid white; border-radius: 6px; cursor: pointer; font-weight: bold; background: blue; min-width: 55px; }
-        
-        .floor { position: absolute; bottom: 150px; width: 100%; height: 5px; background-color: white; z-index: 5; }
-        #character { width: 60px; height: 60px; background-color: red; position: absolute; bottom: 150px; left: 50px; z-index: 100; }
-        #enemy { width: 60px; height: 60px; background-color: blue; position: absolute; bottom: 150px; left: 3000px; z-index: 90; }
-        
-        .screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.95); z-index: 2000; text-align: center; color: white; }
-        .big-blue-title { color: blue; font-size: 50px; margin-bottom: 5px; }
-        .hint-text { color: #aaa; font-size: 14px; margin-bottom: 20px; font-weight: normal; }
-        .main-btn { padding: 15px 40px; font-size: 22px; background: blue; color: white; border: 2px solid white; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 15px; }
-        
-        .date-time { color: #00f; font-size: 14px; margin-bottom: 20px; font-family: monospace; }
-        .lang-switcher { display: flex; gap: 10px; margin-bottom: 25px; }
-        .lang-btn { background: #333; color: white; border: 1px solid white; padding: 8px 14px; cursor: pointer; font-size: 14px; border-radius: 6px; }
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .game-element {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            background-color: #3498db;
+            border-radius: 10px;
+            transition: transform 0.1s ease;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+        }
+        .control {
+            width: 80px;
+            height: 80px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.2s ease;
+        }
+        .control:active {
+            background-color: #27ae60;
+        }
     </style>
 </head>
 <body>
-
-    <div class="game-bar">
-        <div class="game-title">JUMPY JUMP</div>
-        <div class="stats">
-            <div class="stat-item"><span class="label" id="lbl-score">PUNKTE</span><span id="score-display">0</span></div>
-            <div class="stat-item"><span class="label" id="lbl-lvl">LEVEL</span><span id="lvl-display">1</span></div>
-            <div class="stat-item"><span class="label" id="lbl-high">REKORD</span><span id="highscore-display">🏆0</span></div>
-        </div>
-        <div class="btn-group">
-            <button class="mini-btn" id="btn-start-top" onclick="startGame()">START</button>
-            <button class="mini-btn" id="btn-stop-top" onclick="stopGame()">STOP</button>
-            <button class="mini-btn" id="btn-reset-top" onclick="resetGame()">RESET</button>
+    <div class="game-container">
+        <div class="game-element"></div>
+        <div class="controls">
+            <div class="control" id="jump">Jump</div>
+            <div class="control" id="move-left">Left</div>
+            <div class="control" id="move-right">Right</div>
         </div>
     </div>
-
-    <div id="start-screen" class="screen">
-        <div id="live-clock" class="date-time">19.02.2026 | 15:00</div>
-        <div class="lang-switcher">
-            <button class="lang-btn" onclick="setLang('de')">DE</button>
-            <button class="lang-btn" onclick="setLang('en')">EN</button>
-            <button class="lang-btn" onclick="setLang('tr')">TR</button>
-            <button class="lang-btn" onclick="setLang('ar')">AR</button>
-            <button class="lang-btn" onclick="setLang('sv')">SV</button>
-        </div>
-        <div class="big-blue-title">JUMPY JUMP</div>
-        <div id="jump-hint" class="hint-text">Leertaste drücken oder Tippen zum Springen</div>
-        <button class="main-btn" id="btn-main-start" onclick="startGame()">START</button>
-    </div>
-
-    <div id="game-over-screen" class="screen" style="display: none;">
-        <h1 id="txt-gameover" style="font-size: 50px;">GAME OVER!</h1>
-        <div id="final-score" style="font-size: 30px; margin-bottom: 25px;">0</div>
-        <button class="main-btn" id="btn-restart" onclick="restartQuick()">RESTART</button>
-    </div>
-
-    <div class="floor"></div>
-    <div id="character"></div>
-    <div id="enemy"></div>
-
     <script>
-        const translations = {
-            de: { score: "PUNKTE", lvl: "LEVEL", high: "REKORD", stop: "STOP", reset: "RESET", start: "START", go: "GAME OVER", restart: "NOCHMAL", hint: "Leertaste drücken oder Tippen zum Springen" },
-            en: { score: "SCORE", lvl: "LEVEL", high: "BEST", stop: "STOP", reset: "RESET", start: "START", go: "GAME OVER", restart: "RESTART", hint: "Press Space or Tap to Jump" },
-            tr: { score: "PUAN", lvl: "SEVİYE", high: "REKOR", stop: "DUR", reset: "SIFIRLA", start: "BAŞLA", go: "OYUN BİTTİ", restart: "TEKRAR", hint: "Zıplamak için Boşluk tuşuna basın veya Dokunun" },
-            ar: { score: "النقاط", lvl: "مستوى", high: "الرقم القياسي", stop: "قف", reset: "إعادة", start: "ابدأ", go: "انتهت اللعبة", restart: "إعادة", hint: "اضغط على مسافة أو المس للقفز" },
-            sv: { score: "POÄNG", lvl: "NIVÅ", high: "REKORD", stop: "STOPP", reset: "RESET", start: "START", go: "GAME OVER", restart: "SPELA IGEN", hint: "Tryck på mellanslag eller peka för att hoppa" }
+        const jumpButton = document.getElementById('jump');
+        const moveLeftButton = document.getElementById('move-left');
+        const moveRightButton = document.getElementById('move-right');
+        const gameElement = document.querySelector('.game-element');
+
+        const jump = () => {
+            gameElement.style.transform = 'translateY(-100px)';
+            setTimeout(() => {
+                gameElement.style.transform = 'translateY(0)';
+            }, 300);
         };
 
-        const char = document.getElementById('character'), ene = document.getElementById('enemy'),
-              scoreDisp = document.getElementById('score-display'), lvlDisp = document.getElementById('lvl-display'),
-              highDisp = document.getElementById('highscore-display'), clockDisp = document.getElementById('live-clock'),
-              startScr = document.getElementById('start-screen'), goScr = document.getElementById('game-over-screen'),
-              hintDisp = document.getElementById('jump-hint');
+        const moveLeft = () => {
+            gameElement.style.transform += 'translateX(-50px)';
+        };
 
-        let score = 0, level = 1, speed = 8, running = false, enemyPos = 3000, charY = 150, jumpVel = 0, grav = 0.8, jumping = false, animId;
-        let highscore = localStorage.getItem('jumpyHighscore') || 0;
-        highDisp.innerText = "🏆" + highscore;
+        const moveRight = () => {
+            gameElement.style.transform += 'translateX(50px)';
+        };
 
-        function setLang(lang) {
-            const t = translations[lang];
-            document.getElementById('lbl-score').innerText = t.score;
-            document.getElementById('lbl-high').innerText = t.high;
-            document.getElementById('lbl-lvl').innerText = t.lvl;
-            document.getElementById('btn-start-top').innerText = t.start;
-            document.getElementById('btn-stop-top').innerText = t.stop;
-            document.getElementById('btn-reset-top').innerText = t.reset;
-            document.getElementById('btn-main-start').innerText = t.start;
-            document.getElementById('txt-gameover').innerText = t.go;
-            document.getElementById('btn-restart').innerText = t.restart;
-            hintDisp.innerText = t.hint;
-
-            document.body.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
-        }
-
-        function updateClock() {
-            const n = new Date();
-            const dateStr = String(n.getDate()).padStart(2, '0') + "." + String(n.getMonth() + 1).padStart(2, '0') + ".2026";
-            clockDisp.innerText = dateStr + " | " + n.toLocaleTimeString('de-DE');
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
-
-        function jump() { if (!jumping && running) { jumping = true; jumpVel = 16; } }
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') jump(); });
-        window.addEventListener('touchstart', (e) => { if (e.target.tagName !== 'BUTTON') jump(); });
-
-        function startGame() {
-            if (running) return;
-            running = true;
-            startScr.style.display = 'none';
-            goScr.style.display = 'none';
-            gameLoop();
-        }
-
-        function stopGame() { running = false; cancelAnimationFrame(animId); }
-        function resetGame() {
-            stopGame();
-            score = 0; level = 1; speed = 8; enemyPos = window.innerWidth + 100;
-            charY = 150; jumpVel = 0; jumping = false;
-            updateDisplay();
-            char.style.bottom = '150px';
-            startScr.style.display = 'flex';
-        }
-        function restartQuick() { resetGame(); startGame(); }
-        function updateDisplay() {
-            scoreDisp.innerText = score;
-            lvlDisp.innerText = level;
-            highDisp.innerText = "🏆" + highscore;
-        }
-
-        function gameLoop() {
-            if (!running) return;
-            if (jumping) {
-                charY += jumpVel; jumpVel -= grav;
-                if (charY <= 150) { charY = 150; jumping = false; }
-            }
-            char.style.bottom = charY + 'px';
-            enemyPos -= speed;
-            if (enemyPos < -60) {
-                enemyPos = window.innerWidth + 100;
-                score++;
-                if (score % 5 === 0) { level++; speed += 0.8; }
-                updateDisplay();
-            }
-            ene.style.left = enemyPos + 'px';
-
-            let cRect = char.getBoundingClientRect(), eRect = ene.getBoundingClientRect();
-            if (cRect.right > eRect.left + 15 && cRect.left < eRect.right - 15 && cRect.bottom > eRect.top + 15) {
-                running = false;
-                if (score > highscore) { highscore = score; localStorage.setItem('jumpyHighscore', highscore); }
-                document.getElementById('final-score').innerText = score;
-                goScr.style.display = 'flex';
-            } else {
-                animId = requestAnimationFrame(gameLoop);
-            }
-        }
+        jumpButton.addEventListener('touchstart', jump);
+        moveLeftButton.addEventListener('touchstart', moveLeft);
+        moveRightButton.addEventListener('touchstart', moveRight);
     </script>
 </body>
 </html>
